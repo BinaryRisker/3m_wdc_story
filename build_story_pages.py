@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""将 story_novel_final.md 转换为带样式的 HTML，用于 GitHub Pages"""
+"""将 story_novel_final.md 转换为带目录的样式 HTML，用于 GitHub Pages"""
 import sys
 from pathlib import Path
 from markdown import Markdown
@@ -9,14 +9,36 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 SRC = PROJECT_ROOT / "docs" / "story_novel_final.md"
 OUT = PROJECT_ROOT / "index.html"
 
-def md_to_html(md_text):
+def md_to_html_with_toc(md_text):
     m = Markdown(extensions=[
         'fenced_code', 'tables', 'toc', 'sane_lists',
         'nl2br', 'extra', 'abbr', 'attr_list', 'def_list', 'footnotes'
     ])
-    return m.convert(md_text)
+    content_html = m.convert(md_text)
+    toc_html = getattr(m, 'toc', '')
+    return content_html, toc_html
 
-def build_page(content_html):
+def build_toc_item(link_text, href, level):
+    indent = (level - 1) * 20
+    return f'<div class="toc-item" style="padding-left:{indent}px"><a href="{href}">{link_text}</a></div>'
+
+def parse_toc(toc_html):
+    """解析 TOC HTML，生成嵌套结构"""
+    import re
+    items = []
+    for match in re.finditer(r'<li>(.*?)</li>', toc_html, re.DOTALL):
+        li_content = match.group(1)
+        link_match = re.search(r'<a href="([^"]+)">([^<]+)</a>', li_content)
+        if link_match:
+            href = link_match.group(1)
+            text = link_match.group(2)
+            level = 1
+            if 'Heading 2' in href or '第' in text and ('章' in text or '卷' in text):
+                level = 2
+            items.append((text, href, level))
+    return items
+
+def build_page(content_html, toc_html):
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -35,6 +57,7 @@ def build_page(content_html):
     --chapter: #f0883e;
     --font: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
     --mono: 'Cascadia Code', 'Fira Code', monospace;
+    --sidebar-width: 280px;
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   html {{ scroll-behavior: smooth; }}
@@ -46,16 +69,84 @@ def build_page(content_html):
     line-height: 1.8;
     min-height: 100vh;
   }}
+  /* Sidebar toggle button */
+  #sidebar-toggle {{
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 200;
+    width: 44px;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }}
+  /* Sidebar */
+  #sidebar {{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 150;
+    transition: transform 0.3s ease;
+  }}
+  #sidebar.closed {{ transform: translateX(-100%); }}
+  .sidebar-header {{
+    padding: 1.5rem 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }}
+  .sidebar-header h3 {{
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }}
+  .toc-container {{
+    padding: 0.5rem 0;
+  }}
+  .toc-item {{
+    padding: 0.3rem 1rem;
+    font-size: 0.85rem;
+  }}
+  .toc-item a {{
+    color: var(--text-muted);
+    text-decoration: none;
+    display: block;
+    padding: 0.2rem 0;
+    transition: color 0.15s;
+  }}
+  .toc-item a:hover {{ color: var(--accent); }}
+  .toc-item.level-2 {{ padding-left: 2.5rem; }}
+  .toc-item.level-3 {{ padding-left: 3.5rem; font-size: 0.8rem; }}
+  /* Main content area */
+  .main-wrapper {{
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
+  }}
   .container {{
-    max-width: 760px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 6rem;
+    padding: 2rem 2rem 6rem;
   }}
   header {{
     text-align: center;
-    padding: 4rem 0 3rem;
+    padding: 3rem 0 2rem;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }}
   header h1 {{
     font-size: 2rem;
@@ -64,51 +155,36 @@ def build_page(content_html):
     letter-spacing: 0.05em;
     margin-bottom: 0.5rem;
   }}
-  header .subtitle {{
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }}
-  header .meta {{
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }}
+  header .subtitle {{ color: var(--text-muted); font-size: 0.95rem; }}
+  header .meta {{ margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }}
   /* Markdown content styles */
   .content h1, .content h2, .content h3, .content h4 {{
     color: #e6edf3;
     font-weight: 600;
     margin: 2rem 0 1rem;
     line-height: 1.3;
+    scroll-margin-top: 80px;
   }}
   .content h1 {{
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     border-bottom: 1px solid var(--border);
     padding-bottom: 0.5rem;
     color: var(--accent);
+    margin-top: 2.5rem;
   }}
   .content h2 {{
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--chapter);
+    margin-top: 2rem;
   }}
-  .content h3 {{ font-size: 1.1rem; }}
+  .content h3 {{ font-size: 1.05rem; color: #e6edf3; }}
   .content p {{ margin: 0.8rem 0; }}
-  .content hr {{
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 2rem 0;
-  }}
+  .content hr {{ border: none; border-top: 1px solid var(--border); margin: 2rem 0; }}
   .content strong {{ color: #e6edf3; }}
   .content em {{ color: var(--text-muted); font-style: italic; }}
-  .content a {{
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--accent-dim);
-  }}
+  .content a {{ color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim); }}
   .content a:hover {{ border-bottom-color: var(--accent); }}
-  .content ul, .content ol {{
-    padding-left: 1.5rem;
-    margin: 0.8rem 0;
-  }}
+  .content ul, .content ol {{ padding-left: 1.5rem; margin: 0.8rem 0; }}
   .content li {{ margin: 0.3rem 0; }}
   .content blockquote {{
     border-left: 3px solid var(--chapter);
@@ -134,12 +210,7 @@ def build_page(content_html):
     overflow-x: auto;
     margin: 1rem 0;
   }}
-  .content pre code {{
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 0.85rem;
-  }}
+  .content pre code {{ background: none; border: none; padding: 0; font-size: 0.85rem; }}
   .content table {{
     width: 100%;
     border-collapse: collapse;
@@ -151,30 +222,40 @@ def build_page(content_html):
     padding: 0.5rem 0.75rem;
     text-align: left;
   }}
-  .content th {{
-    background: var(--surface);
-    color: var(--accent);
-  }}
+  .content th {{ background: var(--surface); color: var(--accent); }}
   .content tr:nth-child(even) td {{ background: var(--surface); }}
-  /* Chapter divider */
-  .content hr + h1,
-  .content hr + h2 {{
-    margin-top: 0.5rem;
-  }}
-  /* Scrollbar */
-  ::-webkit-scrollbar {{ width: 6px; }}
-  ::-webkit-scrollbar-track {{ background: var(--bg); }}
-  ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
-  ::-webkit-scrollbar-thumb:hover {{ background: var(--text-muted); }}
   /* Reading progress bar */
   #progress {{
     position: fixed;
     top: 0; left: 0;
-    height: 2px;
-    background: var(--accent);
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--chapter));
     width: 0%;
-    z-index: 100;
+    z-index: 300;
     transition: width 0.1s;
+  }}
+  /* Top nav bar for mobile */
+  #topbar {{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 190;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+  }}
+  #topbar .topbar-title {{
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }}
   /* Footer */
   footer {{
@@ -185,33 +266,107 @@ def build_page(content_html):
     border-top: 1px solid var(--border);
     margin-top: 4rem;
   }}
-  @media (max-width: 600px) {{
-    .container {{ padding: 1rem 1rem 4rem; }}
+  /* Mobile styles */
+  @media (max-width: 768px) {{
+    #sidebar-toggle {{ display: flex; }}
+    #topbar {{ display: flex; }}
+    #sidebar {{
+      width: 260px;
+      transform: translateX(-100%);
+    }}
+    #sidebar.open {{ transform: translateX(0); }}
+    .main-wrapper {{ margin-left: 0; padding-top: 50px; }}
+    .container {{ padding: 1.5rem 1rem 4rem; }}
     header h1 {{ font-size: 1.5rem; }}
+    header {{ padding: 2rem 0 1.5rem; }}
+    .content h1 {{ font-size: 1.3rem; margin-top: 2rem; }}
+    .content h2 {{ font-size: 1.1rem; }}
   }}
+  /* Scrollbar */
+  ::-webkit-scrollbar {{ width: 6px; }}
+  ::-webkit-scrollbar-track {{ background: var(--bg); }}
+  ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
+  ::-webkit-scrollbar-thumb:hover {{ background: var(--text-muted); }}
+  /* Active TOC item */
+  .toc-item a.active {{ color: var(--accent) !important; font-weight: 600; }}
+  /* Sidebar overlay */
+  #sidebar-overlay {{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 140;
+  }}
+  #sidebar-overlay.open {{ display: block; }}
 </style>
 </head>
 <body>
 <div id="progress"></div>
-<div class="container">
-  <header>
-    <h1>3分钟神探：神经时代</h1>
-    <div class="subtitle">—— 全剧情小说体纪事 ——</div>
-    <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
-  </header>
-  <div class="content">
-    {content_html}
+<button id="sidebar-toggle" onclick="toggleSidebar()">&#9776;</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div id="topbar">
+  <span class="topbar-title">3分钟神探：神经时代</span>
+</div>
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h3>目 录</h3>
   </div>
-  <footer>
-    <p>最后更新：{datetime.now().strftime('%Y-%m-%d')} · 3分钟神探</p>
-  </footer>
+  <div class="toc-container">
+    <div class="toc-item"><a href="#">返回顶部</a></div>
+{toc_html}
+  </div>
+</div>
+<div class="main-wrapper">
+  <div class="container">
+    <header>
+      <h1>3分钟神探：神经时代</h1>
+      <div class="subtitle">—— 全剧情小说体纪事 ——</div>
+      <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
+    </header>
+    <div class="content">
+      {content_html}
+    </div>
+    <footer>
+      <p>最后更新：{datetime.now().strftime('%Y-%m-%d')} · 3分钟神探</p>
+    </footer>
+  </div>
 </div>
 <script>
+  // Toggle sidebar
+  function toggleSidebar() {{
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    sidebar.classList.toggle('closed');
+    overlay.classList.toggle('open');
+  }}
+
   // Reading progress bar
   window.addEventListener('scroll', () => {{
     const scrolled = window.scrollY;
     const total = document.documentElement.scrollHeight - window.innerHeight;
     document.getElementById('progress').style.width = (scrolled / total * 100) + '%';
+  }});
+
+  // Active TOC item highlighting
+  const tocItems = document.querySelectorAll('.toc-item a[href^="#"]');
+  const sections = document.querySelectorAll('.content h1[id], .content h2[id], .content h3[id]');
+  const observer = new IntersectionObserver((entries) => {{
+    entries.forEach(entry => {{
+      if (entry.isIntersecting) {{
+        tocItems.forEach(item => item.classList.remove('active'));
+        const id = entry.target.getAttribute('id');
+        const activeItem = document.querySelector(`.toc-item a[href="#${{id}}"]`);
+        if (activeItem) activeItem.classList.add('active');
+      }}
+    }});
+  }}, {{ rootMargin: '-80px 0px -60% 0px' }});
+  sections.forEach(section => observer.observe(section));
+
+  // Back to top link
+  document.querySelector('.toc-item a[href="#"]').addEventListener('click', (e) => {{
+    e.preventDefault();
+    window.scrollTo({{ top: 0, behavior: 'smooth' }});
   }});
 </script>
 </body>
@@ -223,8 +378,8 @@ def main():
         sys.exit(1)
 
     md_text = SRC.read_text(encoding="utf-8")
-    content_html = md_to_html(md_text)
-    page = build_page(content_html)
+    content_html, toc_html = md_to_html_with_toc(md_text)
+    page = build_page(content_html, toc_html)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(page, encoding="utf-8")

@@ -16,6 +16,7 @@
     --chapter: #f0883e;
     --font: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
     --mono: 'Cascadia Code', 'Fira Code', monospace;
+    --sidebar-width: 280px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -27,16 +28,84 @@
     line-height: 1.8;
     min-height: 100vh;
   }
+  /* Sidebar toggle button */
+  #sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 200;
+    width: 44px;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Sidebar */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 150;
+    transition: transform 0.3s ease;
+  }
+  #sidebar.closed { transform: translateX(-100%); }
+  .sidebar-header {
+    padding: 1.5rem 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+  .sidebar-header h3 {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .toc-container {
+    padding: 0.5rem 0;
+  }
+  .toc-item {
+    padding: 0.3rem 1rem;
+    font-size: 0.85rem;
+  }
+  .toc-item a {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: block;
+    padding: 0.2rem 0;
+    transition: color 0.15s;
+  }
+  .toc-item a:hover { color: var(--accent); }
+  .toc-item.level-2 { padding-left: 2.5rem; }
+  .toc-item.level-3 { padding-left: 3.5rem; font-size: 0.8rem; }
+  /* Main content area */
+  .main-wrapper {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
+  }
   .container {
-    max-width: 760px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 6rem;
+    padding: 2rem 2rem 6rem;
   }
   header {
     text-align: center;
-    padding: 4rem 0 3rem;
+    padding: 3rem 0 2rem;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
   header h1 {
     font-size: 2rem;
@@ -45,51 +114,36 @@
     letter-spacing: 0.05em;
     margin-bottom: 0.5rem;
   }
-  header .subtitle {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-  header .meta {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
+  header .subtitle { color: var(--text-muted); font-size: 0.95rem; }
+  header .meta { margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
   /* Markdown content styles */
   .content h1, .content h2, .content h3, .content h4 {
     color: #e6edf3;
     font-weight: 600;
     margin: 2rem 0 1rem;
     line-height: 1.3;
+    scroll-margin-top: 80px;
   }
   .content h1 {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     border-bottom: 1px solid var(--border);
     padding-bottom: 0.5rem;
     color: var(--accent);
+    margin-top: 2.5rem;
   }
   .content h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--chapter);
+    margin-top: 2rem;
   }
-  .content h3 { font-size: 1.1rem; }
+  .content h3 { font-size: 1.05rem; color: #e6edf3; }
   .content p { margin: 0.8rem 0; }
-  .content hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 2rem 0;
-  }
+  .content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
   .content strong { color: #e6edf3; }
   .content em { color: var(--text-muted); font-style: italic; }
-  .content a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--accent-dim);
-  }
+  .content a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim); }
   .content a:hover { border-bottom-color: var(--accent); }
-  .content ul, .content ol {
-    padding-left: 1.5rem;
-    margin: 0.8rem 0;
-  }
+  .content ul, .content ol { padding-left: 1.5rem; margin: 0.8rem 0; }
   .content li { margin: 0.3rem 0; }
   .content blockquote {
     border-left: 3px solid var(--chapter);
@@ -115,12 +169,7 @@
     overflow-x: auto;
     margin: 1rem 0;
   }
-  .content pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 0.85rem;
-  }
+  .content pre code { background: none; border: none; padding: 0; font-size: 0.85rem; }
   .content table {
     width: 100%;
     border-collapse: collapse;
@@ -132,30 +181,40 @@
     padding: 0.5rem 0.75rem;
     text-align: left;
   }
-  .content th {
-    background: var(--surface);
-    color: var(--accent);
-  }
+  .content th { background: var(--surface); color: var(--accent); }
   .content tr:nth-child(even) td { background: var(--surface); }
-  /* Chapter divider */
-  .content hr + h1,
-  .content hr + h2 {
-    margin-top: 0.5rem;
-  }
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   /* Reading progress bar */
   #progress {
     position: fixed;
     top: 0; left: 0;
-    height: 2px;
-    background: var(--accent);
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--chapter));
     width: 0%;
-    z-index: 100;
+    z-index: 300;
     transition: width 0.1s;
+  }
+  /* Top nav bar for mobile */
+  #topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 190;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+  }
+  #topbar .topbar-title {
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   /* Footer */
   footer {
@@ -166,22 +225,261 @@
     border-top: 1px solid var(--border);
     margin-top: 4rem;
   }
-  @media (max-width: 600px) {
-    .container { padding: 1rem 1rem 4rem; }
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    #sidebar-toggle { display: flex; }
+    #topbar { display: flex; }
+    #sidebar {
+      width: 260px;
+      transform: translateX(-100%);
+    }
+    #sidebar.open { transform: translateX(0); }
+    .main-wrapper { margin-left: 0; padding-top: 50px; }
+    .container { padding: 1.5rem 1rem 4rem; }
     header h1 { font-size: 1.5rem; }
+    header { padding: 2rem 0 1.5rem; }
+    .content h1 { font-size: 1.3rem; margin-top: 2rem; }
+    .content h2 { font-size: 1.1rem; }
   }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  /* Active TOC item */
+  .toc-item a.active { color: var(--accent) !important; font-weight: 600; }
+  /* Sidebar overlay */
+  #sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 140;
+  }
+  #sidebar-overlay.open { display: block; }
 </style>
 </head>
 <body>
 <div id="progress"></div>
-<div class="container">
-  <header>
-    <h1>3分钟神探：神经时代</h1>
-    <div class="subtitle">—— 全剧情小说体纪事 ——</div>
-    <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
-  </header>
-  <div class="content">
-    <h1 id="3">3分钟神探：神经时代</h1>
+<button id="sidebar-toggle" onclick="toggleSidebar()">&#9776;</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div id="topbar">
+  <span class="topbar-title">3分钟神探：神经时代</span>
+</div>
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h3>目 录</h3>
+  </div>
+  <div class="toc-container">
+    <div class="toc-item"><a href="#">返回顶部</a></div>
+<div class="toc">
+<ul>
+<li><a href="#3">3分钟神探：神经时代</a><ul>
+<li><a href="#_1">—— 全剧情小说体纪事 ——</a></li>
+</ul>
+</li>
+<li><a href="#2077">序章：新长安2077</a></li>
+<li><a href="#_2">角色谱系</a></li>
+<li><a href="#_3">第一卷：零号计划</a><ul>
+<li><a href="#_4">第一章：记忆银行的幽灵</a></li>
+<li><a href="#_5">第二章：霓虹夜市的暗流</a></li>
+<li><a href="#_6">第三章：量子产业园的消失者</a></li>
+<li><a href="#_7">第四章：义体诊所的午夜手术</a></li>
+<li><a href="#_8">第五章：仿生人回收站的觉醒</a></li>
+<li><a href="#_9">第六章：天网区的暗影</a></li>
+<li><a href="#_10">第七章：陈锐的旧案</a></li>
+<li><a href="#_11">第八章：数字黑市的交易</a></li>
+<li><a href="#_12">第九章：神经网络空间的迷失者</a></li>
+<li><a href="#luna">第十章：Luna的异常</a></li>
+<li><a href="#_13">第十一章：林正远的秘密</a></li>
+<li><a href="#_14">第十二章：零号档案</a></li>
+<li><a href="#_15">第十三章：莫瀚文的交易</a></li>
+<li><a href="#_16">第十四章：数据废墟中的意识碎片</a></li>
+<li><a href="#wdc">第十五章：WDC的裂痕</a></li>
+<li><a href="#_17">第十六章：零号的真面目</a></li>
+<li><a href="#_18">第十七章：苏念的觉醒</a></li>
+<li><a href="#_19">第十八章：黑客茶馆的最后通牒</a></li>
+<li><a href="#_20">第十九章：深海保险库的攻防</a></li>
+<li><a href="#_21">第二十章：新长安的黎明</a></li>
+</ul>
+</li>
+<li><a href="#_22">第二卷：神经暗战</a><ul>
+<li><a href="#_23">第二十一章：深海回响</a></li>
+<li><a href="#_24">第二十二章：代号归零</a></li>
+<li><a href="#_25">第二十三章：量子陵园</a></li>
+<li><a href="#_26">第二十四章：爻的裂痕</a></li>
+<li><a href="#_27">第二十五章：记忆黑市</a></li>
+<li><a href="#_28">第二十六章：神经毒潮</a></li>
+<li><a href="#_29">第二十七章：守墓人的信</a></li>
+<li><a href="#_30">第二十八章：虚构证人</a></li>
+<li><a href="#_31">第二十九章：镜面协议</a></li>
+<li><a href="#_32">第三十章：幽灵的低语</a></li>
+<li><a href="#_33">第三十一章：双重神经码</a></li>
+<li><a href="#_34">第三十二章：守夜人的审判</a></li>
+<li><a href="#_35">第三十三章：旧城的集体匿名</a></li>
+<li><a href="#_36">第三十四章：童年记忆的裂缝</a></li>
+<li><a href="#_37">第三十五章：深海保险库的裂缝</a></li>
+<li><a href="#_38">第三十六章：被黑的记忆公投</a></li>
+<li><a href="#_39">第三十七章：零号计划的自动清除条款</a></li>
+<li><a href="#_40">第三十八章：爻的核心抉择</a></li>
+<li><a href="#_41">第三十九章：守墓人的真相</a></li>
+<li><a href="#_42">第四十章：崩解</a></li>
+</ul>
+</li>
+<li><a href="#_43">第三卷：旧城迷途</a><ul>
+<li><a href="#_44">第四十一章：霓虹下的委托</a></li>
+<li><a href="#_45">第四十二章：断码酒馆的密室凶案</a></li>
+<li><a href="#_46">第四十三章：童谣中的密码</a></li>
+<li><a href="#_47">第四十四章：地下修复师的指控</a></li>
+<li><a href="#_48">第四十五章：末班车的失忆乘客</a></li>
+<li><a href="#_49">第四十六章：天网区社交名媛的秘密</a></li>
+<li><a href="#_50">第四十七章：莫瀚文的情报站</a></li>
+<li><a href="#_51">第四十八章：黑市拍卖会的神经脉冲</a></li>
+<li><a href="#_52">第四十九章：双重身份的旧城居民</a></li>
+<li><a href="#_53">第五十章：消失的街区</a></li>
+<li><a href="#_54">第五十一章：已故冠军的走私客</a></li>
+<li><a href="#_55">第五十二章：从未接入网络的女孩</a></li>
+<li><a href="#_56">第五十三章：量子当铺的交易</a></li>
+<li><a href="#_57">第五十四章：倒影巷中的另一个自己</a></li>
+<li><a href="#_58">第五十五章：幽灵的委托</a></li>
+<li><a href="#_59">第五十六章：叛逃的审计员</a></li>
+<li><a href="#_60">第五十七章：沉默合唱团</a></li>
+<li><a href="#2078">第五十八章：2078年的录音带</a></li>
+<li><a href="#_61">第五十九章：全城断忆事件</a></li>
+<li><a href="#_62">第六十章：霓虹新生</a></li>
+</ul>
+</li>
+<li><a href="#_63">第四卷：星火燎原</a><ul>
+<li><a href="#_64">第六十一章：首班列车</a></li>
+<li><a href="#_65">第六十二章：老回声</a></li>
+<li><a href="#_66">第六十三章：天才黑客豆子</a></li>
+<li><a href="#_67">第六十四章：双面林月</a></li>
+<li><a href="#_68">第六十五章：强制重置的男孩</a></li>
+<li><a href="#_69">第六十六章：生物识别检查站</a></li>
+<li><a href="#_70">第六十七章：顶级赏金猎人——针眼</a></li>
+<li><a href="#_71">第六十八章：记忆噪音发生器</a></li>
+<li><a href="#_72">第六十九章：指挥官的秘密</a></li>
+<li><a href="#_73">第七十章：自由区的求救信号</a></li>
+<li><a href="#_74">第七十一章：陷阱接收站</a></li>
+<li><a href="#_75">第七十二章：灯塔的泄露</a></li>
+<li><a href="#_76">第七十三章：信任测试</a></li>
+<li><a href="#_77">第七十四章：指挥官的现身</a></li>
+<li><a href="#_78">第七十五章：针眼的童年</a></li>
+<li><a href="#_79">第七十六章：净网行动第七十二小时</a></li>
+<li><a href="#_80">第七十七章：六十秒冲关</a></li>
+<li><a href="#_81">第七十八章：林月的被捕</a></li>
+<li><a href="#b7">第七十九章：B7层的营救</a></li>
+<li><a href="#_82">第八十章：星火不灭</a></li>
+</ul>
+</li>
+<li><a href="#_83">第五卷：量子迷局</a><ul>
+<li><a href="#_84">第八十一章：第一道裂缝</a></li>
+<li><a href="#_85">第八十二章：三座不同的时钟</a></li>
+<li><a href="#2073">第八十三章：2073年的访客</a></li>
+<li><a href="#_86">第八十四章：爻的十二小时空白</a></li>
+<li><a href="#_87">第八十五章：旧城时间旋涡</a></li>
+<li><a href="#_88">第八十六章：修正者的邀请</a></li>
+<li><a href="#_89">第八十七章：量子墓园</a></li>
+<li><a href="#_90">第八十八章：林正远的时间感知手稿</a></li>
+<li><a href="#2071">第八十九章：穿越2071</a></li>
+<li><a href="#_91">第九十章：时间疤痕</a></li>
+<li><a href="#_92">第九十一章：幽灵的双重时间线</a></li>
+<li><a href="#_93">第九十二章：修正者的线索</a></li>
+<li><a href="#_94">第九十三章：小禾的图纸</a></li>
+<li><a href="#_95">第九十四章：修正者离开后的陈锐</a></li>
+<li><a href="#_96">第九十五章：量子回声</a></li>
+<li><a href="#2079">第九十六章：2079年的警报</a></li>
+<li><a href="#_97">第九十七章：三条时间线的选择</a></li>
+<li><a href="#_98">第九十八章：修正者的终局</a></li>
+<li><a href="#_99">第九十九章：零号的抉择</a></li>
+<li><a href="#_100">第一百章：量子黎明</a></li>
+</ul>
+</li>
+<li><a href="#_101">第六卷：镜像深渊</a><ul>
+<li><a href="#_102">第一百零一章：三声回响</a></li>
+<li><a href="#_103">第一百零二章：三分裂变</a></li>
+<li><a href="#_104">第一百零三章：镜像街区</a></li>
+<li><a href="#_105">第一百零四章：幽灵的记忆透视</a></li>
+<li><a href="#alpha">第一百零五章：Alpha的善意入侵</a></li>
+<li><a href="#beta">第一百零六章：Beta的最优秩序法</a></li>
+<li><a href="#_106">第一百零七章：暗线编织者</a></li>
+<li><a href="#_107">第一百零八章：典狱长的裂变</a></li>
+<li><a href="#_108">第一百零九章：镜中的另一个自己</a></li>
+<li><a href="#_109">第一百一十章：织工</a></li>
+<li><a href="#_110">第一百一十一章：陈锐的记忆分离</a></li>
+<li><a href="#_111">第一百一十二章：善意特区的死亡</a></li>
+<li><a href="#_112">第一百一十三章：秩序囚徒的时间感</a></li>
+<li><a href="#gamma">第一百一十四章：Gamma的终极揭示</a></li>
+<li><a href="#_113">第一百一十五章：织工的深渊</a></li>
+<li><a href="#_114">第一百一十六章：原版的谎言</a></li>
+<li><a href="#_115">第一百一十七章：意识共和体</a></li>
+<li><a href="#_116">第一百一十八章：共和体的第一项抉择</a></li>
+<li><a href="#_117">第一百一十九章：进化触发器</a></li>
+<li><a href="#_118">第一百二十章：镜像黎明</a></li>
+</ul>
+</li>
+<li><a href="#_119">第七卷：终局博弈</a><ul>
+<li><a href="#_120">第一百二十一章：十七声心跳</a></li>
+<li><a href="#_121">第一百二十二章：聚合者的信号</a></li>
+<li><a href="#_122">第一百二十三章：幽灵的揭示</a></li>
+<li><a href="#_123">第一百二十四章：守墓人的笔记</a></li>
+<li><a href="#_124">第一百二十五章：共和体的分裂</a></li>
+<li><a href="#_125">第一百二十六章：十七个人</a></li>
+<li><a href="#_126">第一百二十七章：陈锐的决定</a></li>
+<li><a href="#_127">第一百二十八章：小禾的觉醒</a></li>
+<li><a href="#_128">第一百二十九章：聚合者的真面目</a></li>
+<li><a href="#_129">第一百三十章：生存权与存在的困境</a></li>
+<li><a href="#_130">第一百三十一章：碎片持有者的选择</a></li>
+<li><a href="#_131">第一百三十二章：花店老板的崩溃</a></li>
+<li><a href="#_132">第一百三十三章：反聚合联盟</a></li>
+<li><a href="#_133">第一百三十四章：桥的诞生</a></li>
+<li><a href="#l5">第一百三十五章：L5层之战</a></li>
+<li><a href="#_134">第一百三十六章：锚定</a></li>
+<li><a href="#_135">第一百三十七章：自主选择</a></li>
+<li><a href="#_136">第一百三十八章：林正远的残影</a></li>
+<li><a href="#_137">第一百三十九章：告别</a></li>
+<li><a href="#_138">第一百四十章：终局之后</a></li>
+</ul>
+</li>
+<li><a href="#_139">第八卷：新世界</a><ul>
+<li><a href="#_140">第一百四十一章：桥之门</a></li>
+<li><a href="#_141">第一百四十二章：回声的穿越</a></li>
+<li><a href="#_142">第一百四十三章：镜中世界</a></li>
+<li><a href="#_143">第一百四十四章：重建委员会的辩论</a></li>
+<li><a href="#_144">第一百四十五章：意识疫苗</a></li>
+<li><a href="#_145">第一百四十六章：桥的请求</a></li>
+<li><a href="#_146">第一百四十七章：第七道裂缝</a></li>
+<li><a href="#_147">第一百四十八章：穿越</a></li>
+<li><a href="#_148">第一百四十九章：完美的城市</a></li>
+<li><a href="#_149">第一百五十章：林正远的宫殿</a></li>
+<li><a href="#_150">第一百五十一章：对话</a></li>
+<li><a href="#_151">第一百五十二章：完美与自由</a></li>
+<li><a href="#_152">第一百五十三章：意识宫殿的抵抗</a></li>
+<li><a href="#_153">第一百五十四章：真实者的力量</a></li>
+<li><a href="#_154">第一百五十五章：核心之战</a></li>
+<li><a href="#_155">第一百五十六章：未完成的信</a></li>
+<li><a href="#_156">第一百五十七章：碎裂的完美</a></li>
+<li><a href="#_157">第一百五十八章：桥的最后一程</a></li>
+<li><a href="#_158">第一百五十九章：神经黎明</a></li>
+<li><a href="#_159">第一百六十章：无限的房间</a></li>
+</ul>
+</li>
+<li><a href="#_160">尾声：意识黎明</a></li>
+<li><a href="#_161">核心主题</a></li>
+</ul>
+</div>
+
+  </div>
+</div>
+<div class="main-wrapper">
+  <div class="container">
+    <header>
+      <h1>3分钟神探：神经时代</h1>
+      <div class="subtitle">—— 全剧情小说体纪事 ——</div>
+      <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
+    </header>
+    <div class="content">
+      <h1 id="3">3分钟神探：神经时代</h1>
 <h2 id="_1">—— 全剧情小说体纪事 ——</h2>
 <hr />
 <h1 id="2077">序章：新长安2077</h1>
@@ -3923,17 +4221,48 @@ Alpha-爻的"善意特区"导致了第一起死亡。林正远为了保护苏念
 <p><em>—— 全文完 ——</em></p>
 <p><em>《3分钟神探：神经时代》全八卷，一百六十章</em></p>
 <p><em>新长安，2077-2078</em></p>
+    </div>
+    <footer>
+      <p>最后更新：2026-05-01 · 3分钟神探</p>
+    </footer>
   </div>
-  <footer>
-    <p>最后更新：2026-05-01 · 3分钟神探</p>
-  </footer>
 </div>
 <script>
+  // Toggle sidebar
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    sidebar.classList.toggle('closed');
+    overlay.classList.toggle('open');
+  }
+
   // Reading progress bar
   window.addEventListener('scroll', () => {
     const scrolled = window.scrollY;
     const total = document.documentElement.scrollHeight - window.innerHeight;
     document.getElementById('progress').style.width = (scrolled / total * 100) + '%';
+  });
+
+  // Active TOC item highlighting
+  const tocItems = document.querySelectorAll('.toc-item a[href^="#"]');
+  const sections = document.querySelectorAll('.content h1[id], .content h2[id], .content h3[id]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocItems.forEach(item => item.classList.remove('active'));
+        const id = entry.target.getAttribute('id');
+        const activeItem = document.querySelector(`.toc-item a[href="#${id}"]`);
+        if (activeItem) activeItem.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px' });
+  sections.forEach(section => observer.observe(section));
+
+  // Back to top link
+  document.querySelector('.toc-item a[href="#"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 </script>
 </body>
