@@ -80,8 +80,8 @@ def build_sidebar(headings):
         html_parts.append(
             f'<div class="nav-group">'
             f'<div class="nav-item nav-volume" onclick="toggleGroup(this)">'
-            f'<a href="#{vol["slug"]}" class="nav-link" onclick="event.stopPropagation()">'
             f'<span class="nav-arrow">&#9654;</span>'
+            f'<a href="#{vol["slug"]}" class="nav-link">'
             f'<span class="nav-text">{vol["title"]}</span>'
             f'{badge}'
             f'</a></div>'
@@ -251,12 +251,15 @@ def build_page(content_html, sidebar_html):
   /* Volume items */
   .nav-volume {{
     cursor: pointer;
+    display: flex;
+    align-items: center;
   }}
   .nav-volume .nav-link {{
     font-weight: 600;
     color: var(--text);
     font-size: 13.5px;
     padding-left: 12px;
+    flex: 1;
   }}
   .nav-volume .nav-link:hover {{ background: var(--surface-hover); }}
   .nav-volume .nav-link.active {{ color: var(--accent); background: var(--surface-active); }}
@@ -267,8 +270,10 @@ def build_page(content_html, sidebar_html):
     transition: transform 0.2s;
     opacity: 0.5;
     flex-shrink: 0;
-    width: 14px;
+    width: 20px;
     text-align: center;
+    padding: 6px 0;
+    cursor: pointer;
   }}
   .nav-group.expanded .nav-arrow {{ transform: rotate(90deg); opacity: 0.8; }}
 
@@ -569,7 +574,7 @@ def build_page(content_html, sidebar_html):
     document.getElementById('sidebar-overlay').classList.toggle('open');
   }}
 
-  // Collapsible volume groups
+  // Collapsible volume groups - toggle expand/collapse
   function toggleGroup(el) {{
     const group = el.closest('.nav-group');
     group.classList.toggle('expanded');
@@ -581,9 +586,16 @@ def build_page(content_html, sidebar_html):
     document.getElementById('progress').style.width = pct + '%';
   }});
 
-  // Active heading tracking + auto-expand
+  // Active heading tracking
   const navLinks = document.querySelectorAll('.nav-scroll .nav-link');
   const headings = document.querySelectorAll('.content h1[id], .content h2[id], .content h3[id]');
+  let userClickingNav = false;
+
+  // Mark when user clicks a nav link to prevent auto-scroll interference
+  document.querySelector('.nav-scroll').addEventListener('click', () => {{
+    userClickingNav = true;
+    setTimeout(() => {{ userClickingNav = false; }}, 2000);
+  }});
 
   const obs = new IntersectionObserver(entries => {{
     entries.forEach(entry => {{
@@ -598,16 +610,18 @@ def build_page(content_html, sidebar_html):
       if (group && !group.classList.contains('expanded')) {{
         group.classList.add('expanded');
       }}
-      // Scroll sidebar to show active item
-      const scroll = active.closest('.nav-scroll');
-      if (scroll) {{
-        const top = active.offsetTop - scroll.offsetTop - scroll.clientHeight / 3;
-        if (top > scroll.scrollTop || top < scroll.scrollTop - scroll.clientHeight / 2) {{
-          scroll.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
+      // Only auto-scroll sidebar when NOT triggered by user click
+      if (!userClickingNav) {{
+        const scroll = active.closest('.nav-scroll');
+        if (scroll) {{
+          const top = active.offsetTop - scroll.offsetTop - scroll.clientHeight / 3;
+          if (top > scroll.scrollTop || top < scroll.scrollTop - scroll.clientHeight / 2) {{
+            scroll.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
+          }}
         }}
       }}
     }});
-  }}, {{ rootMargin: '-80px 0px -60% 0px' }});
+  }}, {{ rootMargin: '-60px 0px -40% 0px' }});
   headings.forEach(h => obs.observe(h));
 
   // Expand first volume on load
