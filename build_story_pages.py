@@ -374,24 +374,6 @@ def build_page(content_html, sidebar_html):
   }}
   #sidebar-overlay.open {{ display: block; }}
 
-  @media (max-width: 768px) {{
-    #sidebar-toggle {{ display: flex; }}
-    #topbar {{ display: flex; }}
-    #sidebar {{ width: 270px; transform: translateX(-100%); }}
-    #sidebar.open {{ transform: translateX(0); }}
-    .main-wrapper {{ margin-left: 0; padding-top: 56px; }}
-    .container {{ padding: 1rem 0.8rem 4rem; }}
-    header {{ padding: 1.5rem 0 1rem; }}
-    header h1 {{ font-size: 1.3rem; }}
-    header .subtitle {{ font-size: 0.85rem; }}
-    .content h1 {{ font-size: 1.2rem; scroll-margin-top: 56px; }}
-    .content h2 {{ font-size: 1.05rem; scroll-margin-top: 56px; }}
-    .content h3 {{ scroll-margin-top: 56px; }}
-    .content p {{ margin: 0.6rem 0; }}
-    .content table {{ font-size: 0.8rem; }}
-    .content th, .content td {{ padding: 0.35rem 0.5rem; }}
-  }}
-
   /* ===== Main Content ===== */
   .main-wrapper {{
     margin-left: var(--sidebar-width);
@@ -510,6 +492,25 @@ def build_page(content_html, sidebar_html):
   ::-webkit-scrollbar-track {{ background: var(--bg); }}
   ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
   ::-webkit-scrollbar-thumb:hover {{ background: var(--text-muted); }}
+
+  /* ===== Mobile Override (must be last for specificity) ===== */
+  @media (max-width: 768px) {{
+    #sidebar-toggle {{ display: flex; }}
+    #topbar {{ display: flex; }}
+    #sidebar {{ width: 270px; transform: translateX(-100%); }}
+    #sidebar.open {{ transform: translateX(0); }}
+    .main-wrapper {{ margin-left: 0 !important; padding-top: 56px; }}
+    .container {{ padding: 1rem 0.8rem 4rem; }}
+    header {{ padding: 1.5rem 0 1rem; }}
+    header h1 {{ font-size: 1.3rem; }}
+    header .subtitle {{ font-size: 0.85rem; }}
+    .content h1 {{ font-size: 1.2rem; scroll-margin-top: 56px; }}
+    .content h2 {{ font-size: 1.05rem; scroll-margin-top: 56px; }}
+    .content h3 {{ scroll-margin-top: 56px; }}
+    .content p {{ margin: 0.6rem 0; }}
+    .content table {{ font-size: 0.8rem; }}
+    .content th, .content td {{ padding: 0.35rem 0.5rem; }}
+  }}
 </style>
 </head>
 <body>
