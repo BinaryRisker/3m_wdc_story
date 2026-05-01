@@ -152,6 +152,8 @@ def build_page(content_html, sidebar_html):
     line-height: 1.8;
     min-height: 100vh;
     transition: background 0.3s, color 0.3s;
+    overflow-wrap: break-word;
+    word-break: break-all;
   }}
 
   /* ===== Theme Switcher ===== */
@@ -377,12 +379,17 @@ def build_page(content_html, sidebar_html):
     #topbar {{ display: flex; }}
     #sidebar {{ width: 270px; transform: translateX(-100%); }}
     #sidebar.open {{ transform: translateX(0); }}
-    .main-wrapper {{ margin-left: 0; padding-top: 48px; }}
-    .container {{ padding: 1.5rem 1rem 4rem; }}
-    header h1 {{ font-size: 1.5rem; }}
-    header {{ padding: 2rem 0 1.5rem; }}
-    .content h1 {{ font-size: 1.3rem; }}
-    .content h2 {{ font-size: 1.1rem; }}
+    .main-wrapper {{ margin-left: 0; padding-top: 56px; }}
+    .container {{ padding: 1rem 0.8rem 4rem; }}
+    header {{ padding: 1.5rem 0 1rem; }}
+    header h1 {{ font-size: 1.3rem; }}
+    header .subtitle {{ font-size: 0.85rem; }}
+    .content h1 {{ font-size: 1.2rem; scroll-margin-top: 56px; }}
+    .content h2 {{ font-size: 1.05rem; scroll-margin-top: 56px; }}
+    .content h3 {{ scroll-margin-top: 56px; }}
+    .content p {{ margin: 0.6rem 0; }}
+    .content table {{ font-size: 0.8rem; }}
+    .content th, .content td {{ padding: 0.35rem 0.5rem; }}
   }}
 
   /* ===== Main Content ===== */
@@ -415,8 +422,8 @@ def build_page(content_html, sidebar_html):
     color: var(--text);
     font-weight: 600;
     margin: 2rem 0 1rem;
-    line-height: 1.3;
-    scroll-margin-top: 80px;
+    line-height: 1.4;
+    scroll-margin-top: 60px;
   }}
   .content h1 {{
     font-size: 1.5rem;
