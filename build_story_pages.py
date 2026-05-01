@@ -605,11 +605,6 @@ def build_page(content_html, sidebar_html):
       const active = document.querySelector(`.nav-link[href="#${{id}}"]`);
       if (!active) return;
       active.classList.add('active');
-      // Auto-expand parent volume
-      const group = active.closest('.nav-group');
-      if (group && !group.classList.contains('expanded')) {{
-        group.classList.add('expanded');
-      }}
       // Only auto-scroll sidebar when NOT triggered by user click
       if (!userClickingNav) {{
         const scroll = active.closest('.nav-scroll');
