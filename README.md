@@ -4,7 +4,7 @@
 
 ## 在线阅读
 
-部署于 GitHub Pages: https://binaryrisker.github.io/3m_wdc_story/
+部署于 GitHub Pages: https://story.3mst.cn
 
 ## 故事简介
 
@@ -29,5 +29,4 @@
 
 ## 相关项目
 
-- 游戏项目：[3Minute Detective](https://github.com/BinaryRisker/3min-detective)
 - 官方文档：[项目文档](./docs/)
