@@ -12,40 +12,25 @@ OUT = PROJECT_ROOT / "index.html"
 
 
 def md_to_html(md_text):
+    """Convert markdown to HTML and extract heading IDs from rendered output."""
     m = Markdown(extensions=[
         'fenced_code', 'tables', 'toc', 'sane_lists',
         'nl2br', 'extra', 'abbr', 'attr_list', 'def_list', 'footnotes'
     ])
     content_html = m.convert(md_text)
-    return content_html
-
-
-def slugify(text):
-    """Generate a stable slug from heading text, matching markdown's toc output."""
-    text = re.sub(r'[^\w\s-]', '', text.lower())
-    text = re.sub(r'[\s]+', '-', text).strip('-')
-    if not text:
-        text = 'section'
-    return text
-
-
-def parse_headings(md_text):
-    """Parse headings from markdown source, return list of (level, text, slug)."""
+    # Extract headings with their actual IDs from rendered HTML
     headings = []
-    slug_counts = {}
-    for line in md_text.split('\n'):
-        m = re.match(r'^(#{1,4})\s+(.+)$', line)
-        if m:
-            level = len(m.group(1))
-            text = m.group(2).strip()
-            # Generate slug matching Python-Markdown's behavior
-            slug = re.sub(r'[^\w\s-]', '', text.lower())
-            slug = re.sub(r'\s+', '-', slug).strip('-') or 'section'
-            slug_counts[slug] = slug_counts.get(slug, 0) + 1
-            if slug_counts[slug] > 1:
-                slug = f"{slug}-{slug_counts[slug]}"
-            headings.append((level, text, slug))
-    return headings
+    for match in re.finditer(
+        r'<h([1-4])(?:\s[^>]*)?id="([^"]*)"[^>]*>(.*?)</h\1>',
+        content_html, re.DOTALL
+    ):
+        level = int(match.group(1))
+        slug = match.group(2)
+        inner = match.group(3)
+        # Strip HTML tags to get plain text
+        text = re.sub(r'<[^>]+>', '', inner).strip()
+        headings.append((level, text, slug))
+    return content_html, headings
 
 
 def build_sidebar(headings):
@@ -631,8 +616,7 @@ def main():
         sys.exit(1)
 
     md_text = SRC.read_text(encoding="utf-8")
-    content_html = md_to_html(md_text)
-    headings = parse_headings(md_text)
+    content_html, headings = md_to_html(md_text)
     sidebar_html = build_sidebar(headings)
     page = build_page(content_html, sidebar_html)
 
