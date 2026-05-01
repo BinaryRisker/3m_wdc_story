@@ -18,26 +18,6 @@ def md_to_html_with_toc(md_text):
     toc_html = getattr(m, 'toc', '')
     return content_html, toc_html
 
-def build_toc_item(link_text, href, level):
-    indent = (level - 1) * 20
-    return f'<div class="toc-item" style="padding-left:{indent}px"><a href="{href}">{link_text}</a></div>'
-
-def parse_toc(toc_html):
-    """解析 TOC HTML，生成嵌套结构"""
-    import re
-    items = []
-    for match in re.finditer(r'<li>(.*?)</li>', toc_html, re.DOTALL):
-        li_content = match.group(1)
-        link_match = re.search(r'<a href="([^"]+)">([^<]+)</a>', li_content)
-        if link_match:
-            href = link_match.group(1)
-            text = link_match.group(2)
-            level = 1
-            if 'Heading 2' in href or '第' in text and ('章' in text or '卷' in text):
-                level = 2
-            items.append((text, href, level))
-    return items
-
 def build_page(content_html, toc_html):
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -46,9 +26,12 @@ def build_page(content_html, toc_html):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3分钟神探：神经时代</title>
 <style>
-  :root {{
+  /* ===== Theme System ===== */
+  /* Dark theme (default) */
+  :root, [data-theme="dark"] {{
     --bg: #0d1117;
     --surface: #161b22;
+    --surface-hover: #1c2128;
     --border: #30363d;
     --text: #c9d1d9;
     --text-muted: #8b949e;
@@ -58,6 +41,42 @@ def build_page(content_html, toc_html):
     --font: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
     --mono: 'Cascadia Code', 'Fira Code', monospace;
     --sidebar-width: 280px;
+    --font-size: 16px;
+    --line-height: 1.8;
+  }}
+  /* Light theme */
+  [data-theme="light"] {{
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --surface-hover: #f0f1f3;
+    --border: #d0d7de;
+    --text: #24292f;
+    --text-muted: #636c76;
+    --accent: #0969da;
+    --accent-dim: #0969da22;
+    --chapter: #d47d25;
+    --font: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', monospace;
+    --sidebar-width: 280px;
+    --font-size: 16px;
+    --line-height: 1.8;
+  }}
+  /* Sepia / Eye-care theme */
+  [data-theme="sepia"] {{
+    --bg: #f4ecd8;
+    --surface: #faf6eb;
+    --surface-hover: #ede4ce;
+    --border: #d4c8a8;
+    --text: #5c4634;
+    --text-muted: #8a7355;
+    --accent: #b5732a;
+    --accent-dim: #b5732a22;
+    --chapter: #a85a1f;
+    --font: 'Georgia', 'PingFang SC', 'Microsoft YaHei', 'STSong', 'SimSun', serif;
+    --mono: 'Cascadia Code', 'Fira Code', monospace;
+    --sidebar-width: 280px;
+    --font-size: 17px;
+    --line-height: 1.9;
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   html {{ scroll-behavior: smooth; }}
@@ -65,9 +84,36 @@ def build_page(content_html, toc_html):
     background: var(--bg);
     color: var(--text);
     font-family: var(--font);
-    font-size: 16px;
-    line-height: 1.8;
+    font-size: var(--font-size);
+    line-height: var(--line-height);
     min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }}
+
+  /* Theme Switcher */
+  #theme-switcher {{
+    display: flex;
+    gap: 6px;
+    padding: 0.75rem 1rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }}
+  .theme-btn {{
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }}
+  .theme-btn:hover {{ background: var(--surface-hover); color: var(--text); }}
+  .theme-btn.active {{
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
   }}
   /* Sidebar toggle button */
   #sidebar-toggle {{
@@ -98,11 +144,13 @@ def build_page(content_html, toc_html):
     border-right: 1px solid var(--border);
     overflow-y: auto;
     z-index: 150;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s;
+    display: flex;
+    flex-direction: column;
   }}
   #sidebar.closed {{ transform: translateX(-100%); }}
   .sidebar-header {{
-    padding: 1.5rem 1rem 1rem;
+    padding: 1rem 1rem 0.75rem;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -114,9 +162,12 @@ def build_page(content_html, toc_html):
     font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
   }}
   .toc-container {{
     padding: 0.5rem 0;
+    flex: 1;
+    overflow-y: auto;
   }}
   .toc-item {{
     padding: 0.3rem 1rem;
@@ -128,8 +179,9 @@ def build_page(content_html, toc_html):
     display: block;
     padding: 0.2rem 0;
     transition: color 0.15s;
+    border-radius: 4px;
   }}
-  .toc-item a:hover {{ color: var(--accent); }}
+  .toc-item a:hover {{ color: var(--accent); background: var(--surface-hover); }}
   .toc-item.level-2 {{ padding-left: 2.5rem; }}
   .toc-item.level-3 {{ padding-left: 3.5rem; font-size: 0.8rem; }}
   /* Main content area */
@@ -140,7 +192,7 @@ def build_page(content_html, toc_html):
   .container {{
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 2rem 6rem;
+    padding: 2rem 2.5rem 6rem;
   }}
   header {{
     text-align: center;
@@ -159,7 +211,7 @@ def build_page(content_html, toc_html):
   header .meta {{ margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }}
   /* Markdown content styles */
   .content h1, .content h2, .content h3, .content h4 {{
-    color: #e6edf3;
+    color: var(--text);
     font-weight: 600;
     margin: 2rem 0 1rem;
     line-height: 1.3;
@@ -177,10 +229,10 @@ def build_page(content_html, toc_html):
     color: var(--chapter);
     margin-top: 2rem;
   }}
-  .content h3 {{ font-size: 1.05rem; color: #e6edf3; }}
+  .content h3 {{ font-size: 1.05rem; }}
   .content p {{ margin: 0.8rem 0; }}
   .content hr {{ border: none; border-top: 1px solid var(--border); margin: 2rem 0; }}
-  .content strong {{ color: #e6edf3; }}
+  .content strong {{ color: var(--text); }}
   .content em {{ color: var(--text-muted); font-style: italic; }}
   .content a {{ color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim); }}
   .content a:hover {{ border-bottom-color: var(--accent); }}
@@ -257,6 +309,15 @@ def build_page(content_html, toc_html):
     overflow: hidden;
     text-overflow: ellipsis;
   }}
+  /* Mobile theme switcher in topbar */
+  #topbar-theme {{
+    display: flex;
+    gap: 4px;
+  }}
+  #topbar-theme .theme-btn {{
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }}
   /* Footer */
   footer {{
     text-align: center;
@@ -288,7 +349,7 @@ def build_page(content_html, toc_html):
   ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
   ::-webkit-scrollbar-thumb:hover {{ background: var(--text-muted); }}
   /* Active TOC item */
-  .toc-item a.active {{ color: var(--accent) !important; font-weight: 600; }}
+  .toc-item a.active {{ color: var(--accent) !important; font-weight: 600; background: var(--surface-hover); }}
   /* Sidebar overlay */
   #sidebar-overlay {{
     display: none;
@@ -306,8 +367,18 @@ def build_page(content_html, toc_html):
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div id="topbar">
   <span class="topbar-title">3分钟神探：神经时代</span>
+  <div id="topbar-theme">
+    <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="深色">深</button>
+    <button class="theme-btn" data-theme="light" onclick="setTheme('light')" title="浅色">浅</button>
+    <button class="theme-btn" data-theme="sepia" onclick="setTheme('sepia')" title="护眼">护</button>
+  </div>
 </div>
 <div id="sidebar">
+  <div id="theme-switcher">
+    <button class="theme-btn active" data-theme="dark" onclick="setTheme('dark')" title="深色模式">深色</button>
+    <button class="theme-btn" data-theme="light" onclick="setTheme('light')" title="浅色模式">浅色</button>
+    <button class="theme-btn" data-theme="sepia" onclick="setTheme('sepia')" title="护眼模式">护眼</button>
+  </div>
   <div class="sidebar-header">
     <h3>目 录</h3>
   </div>
@@ -332,6 +403,27 @@ def build_page(content_html, toc_html):
   </div>
 </div>
 <script>
+  // Theme management
+  function setTheme(theme) {{
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('story-theme', theme);
+    updateThemeButtons();
+  }}
+
+  function updateThemeButtons() {{
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    document.querySelectorAll('.theme-btn[data-theme]').forEach(btn => {{
+      btn.classList.toggle('active', btn.getAttribute('data-theme') === current);
+    }});
+  }}
+
+  // Restore theme from localStorage
+  const savedTheme = localStorage.getItem('story-theme');
+  if (savedTheme) {{
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }}
+  updateThemeButtons();
+
   // Toggle sidebar
   function toggleSidebar() {{
     const sidebar = document.getElementById('sidebar');
@@ -364,10 +456,13 @@ def build_page(content_html, toc_html):
   sections.forEach(section => observer.observe(section));
 
   // Back to top link
-  document.querySelector('.toc-item a[href="#"]').addEventListener('click', (e) => {{
-    e.preventDefault();
-    window.scrollTo({{ top: 0, behavior: 'smooth' }});
-  }});
+  const backToTop = document.querySelector('.toc-item a[href="#"]');
+  if (backToTop) {{
+    backToTop.addEventListener('click', (e) => {{
+      e.preventDefault();
+      window.scrollTo({{ top: 0, behavior: 'smooth' }});
+    }});
+  }}
 </script>
 </body>
 </html>"""
