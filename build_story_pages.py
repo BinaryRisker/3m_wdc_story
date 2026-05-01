@@ -5,9 +5,9 @@ from pathlib import Path
 from markdown import Markdown
 from datetime import datetime
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent
 SRC = PROJECT_ROOT / "docs" / "story_novel_final.md"
-OUT = PROJECT_ROOT / "story-site" / "index.html"
+OUT = PROJECT_ROOT / "index.html"
 
 def md_to_html(md_text):
     m = Markdown(extensions=[
