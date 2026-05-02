@@ -113,6 +113,10 @@
   1. 深夜加密视频中站在地下岩洞里，墙壁嵌满发光记忆晶体
   2. 在废弃神经节点留下加密信号后消失，只留一串浅浅脚印
   3. 最终决战中以自身意识为锚，光芒消散的瞬间
+- **小说出场**：
+  1. 第十四章：玩家在数据废墟中感受到一种存在感，发现一串浅浅的脚印指向废墟深处
+  2. 脚印很新，很均匀，像是训练有素的人留下的，但尽头什么都没有
+  3. 玩家意识到有人在暗中观察，那个人不是敌人也不是朋友
 - **AI生成提示词**：A mysterious hooded figure in a deep gray cloak standing in an underground crystal cave, walls embedded with glowing memory crystals like a consciousness cathedral, face hidden in shadow, only a faint voice echoing, sacred and solemn atmosphere, dark fantasy meets cyberpunk
 
 ---
@@ -151,6 +155,10 @@
 - **标志性画面**：
   1. 在旧城的暗巷中帮助一个老人与自己的记忆和解
   2. 面对苏念的记忆碎片，选择保留哪些、释放哪些
+- **小说出场**：
+  1. 第二章：诊所血迹边缘整齐，Luna分析可能是"记忆刺客"所为
+  2. 记忆刺客是一种专门处理记忆的职业，可以精确切割记忆不留痕迹
+  3. 整个新长安可能只有几个人掌握这种技术
 - **AI生成提示词**：A ethereal female figure wrapped in translucent memory fragments like floating glass shards, walking through a neon-lit old city alley, each shard containing a different memory scene, soft golden light emanating from within, ghostly yet beautiful, cyberpunk meets magical realism
 
 ---
@@ -168,6 +176,10 @@
 - **标志性画面**：
   1. 在旧城孤儿院中，周围的人都被记忆修改影响，只有她看到真实的世界
   2. 作为"最终裁决者"面对零号计划的关键时刻
+- **小说出场**：
+  1. 第四章：面摊旁的中年女人怀里的孩子，手腕上没有神经码标签
+  2. 玩家想起旧城孤儿院的传说——从未接入神经网络的女孩，被称为"真实者"
+  3. 她能看到别人看不到的东西——真实颜色
 - **AI生成提示词**：A young girl in simple clothes standing in a run-down orphanage in a cyberpunk old city, no neural interface on her neck, pure innocent eyes seeing the real world while holographic distortions swirl around others, a beacon of truth in a world of manipulated memories, warm natural light contrasting with neon
 
 ---
@@ -239,6 +251,10 @@
 - **标志性画面**：
   1. 站在旧城的高处，看着远处天网区的霓虹灯，表情复杂
   2. 面对使用她当年设计的技术的记忆修复师，严厉但无法阻止
+- **小说出场**：
+  1. 第十五章：玩家在WDC走廊中想起旧城的沈若兰
+  2. 她亲手设计了记忆银行底层代码，看到作品被滥用后选择离开
+  3. 她严厉、固执、有智慧，反对一切神经技术但无法完全否定过去
 - **AI生成提示词**：An older Asian woman with a commanding presence standing on a rooftop in the cyberpunk old city, looking toward the distant neon towers of the new city, wind blowing through her graying hair, complex expression mixing pride and regret, architect of a system she now opposes, dramatic sunset lighting
 
 ---
@@ -256,6 +272,10 @@
 - **标志性画面**：
   1. L5层以下的隐藏空间中，无数微弱的光点在黑暗中漂浮，每一次闪烁都伴随一声几乎听不见的哀嚎
   2. 无数个声音同时低语，汇成一片痛苦的海洋
+- **小说出场**：
+  1. 第十四章：玩家在数据废墟中感受到巨大的混乱意识
+  2. Luna分析：二十年来删除的记忆都没有真正消失，累积形成原始意识
+  3. 它不理解自己是什么，不理解为什么存在，不是敌人只是被遗忘痛苦的总和
 - **AI生成提示词**：A vast ocean of fragmented memories visualized as thousands of tiny flickering light points in a dark abyss below a data center, each point containing a painful memory, collective consciousness of deleted experiences, haunting whispers echoing, dark ethereal atmosphere, digital sublime art
 
 ---
@@ -273,6 +293,10 @@
 - **标志性画面**：
   1. 在旧城街头安静地画画，画中人物的情感轮廓跃然纸上
   2. 面对一个人时闭上眼睛，然后开始画——画出的是那个人记忆的情感重量
+- **小说出场**：
+  1. 第二十章：玩家在中心广场想起旧城的街头艺术家林晓
+  2. 她没有神经接口，但能通过绘画"看到"记忆的痕迹
+  3. 她与小禾形成对照：小禾看到"真实颜色"，林晓画出"情感轮廓"
 - **AI生成提示词**：A young woman artist sitting quietly in a cyberpunk old city street, painting on a canvas with glowing pigments, her painting showing the emotional outline of a person's memories as abstract light patterns, no neural interface on her neck, peaceful concentration, warm street lamp lighting, artistic and contemplative mood
 
 ---
