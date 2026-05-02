@@ -92,7 +92,16 @@ def build_sidebar(headings):
     return '\n'.join(html_parts)
 
 
-def build_page(content_html, sidebar_html):
+def build_page(content_html, sidebar_html, version_info=None):
+    # 版本信息
+    if version_info is None:
+        version_info = {
+            'src_modified': datetime.now().strftime('%Y-%m-%d %H:%M'),
+            'git_hash': 'unknown',
+            'build_time': datetime.now().strftime('%Y-%m-%d %H:%M'),
+            'version': datetime.now().strftime('%Y-%m-%d')
+        }
+    
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -404,6 +413,28 @@ def build_page(content_html, sidebar_html):
   }}
   header .subtitle {{ color: var(--text-muted); font-size: 0.95rem; }}
   header .meta {{ margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }}
+  header .version-info {{
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }}
+  .version-tag {{
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    cursor: help;
+  }}
+  .version-separator {{
+    color: var(--border);
+  }}
 
   .content h1, .content h2, .content h3, .content h4 {{
     color: var(--text);
@@ -491,6 +522,11 @@ def build_page(content_html, sidebar_html):
     border-top: 1px solid var(--border);
     margin-top: 4rem;
   }}
+  footer .footer-detail {{
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    font-family: var(--mono);
+  }}
 
   /* Scrollbar */
   ::-webkit-scrollbar {{ width: 6px; }}
@@ -545,12 +581,20 @@ def build_page(content_html, sidebar_html):
       <h1>3分钟神探：神经时代</h1>
       <div class="subtitle">—— 全剧情小说体纪事 ——</div>
       <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
+      <div class="version-info">
+        <span class="version-tag" title="源文件更新时间">📅 {version_info['src_modified']}</span>
+        <span class="version-separator">·</span>
+        <span class="version-tag" title="Git提交哈希">🔗 {version_info['git_hash']}</span>
+        <span class="version-separator">·</span>
+        <span class="version-tag" title="构建时间">🔨 {version_info['build_time']}</span>
+      </div>
     </header>
     <div class="content">
       {content_html}
     </div>
     <footer>
-      <p>最后更新：{datetime.now().strftime('%Y-%m-%d')} · 3分钟神探</p>
+      <p>版本：{version_info['version']} · 构建于 {version_info['build_time']} · 3分钟神探</p>
+      <p class="footer-detail">源文件更新：{version_info['src_modified']} · Git: {version_info['git_hash']}</p>
     </footer>
   </div>
 </div>
@@ -627,19 +671,57 @@ def build_page(content_html, sidebar_html):
 </html>"""
 
 
+def get_version_info():
+    """获取版本信息：源文件修改时间 + Git commit hash"""
+    # 获取源文件修改时间
+    mtime = SRC.stat().st_mtime
+    src_modified = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M')
+    
+    # 尝试获取Git commit hash
+    git_hash = "unknown"
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'log', '-1', '--format=%h'],
+            capture_output=True, text=True,
+            cwd=PROJECT_ROOT
+        )
+        if result.returncode == 0:
+            git_hash = result.stdout.strip()
+    except:
+        pass
+    
+    # 获取构建时间
+    build_time = datetime.now().strftime('%Y-%m-%d %H:%M')
+    
+    return {
+        'src_modified': src_modified,
+        'git_hash': git_hash,
+        'build_time': build_time,
+        'version': f"{src_modified}-{git_hash}"
+    }
+
+
 def main():
     if not SRC.exists():
         print(f"Error: {SRC} not found")
         sys.exit(1)
 
+    # 获取版本信息
+    version_info = get_version_info()
+    
     md_text = SRC.read_text(encoding="utf-8")
     content_html, headings = md_to_html(md_text)
     sidebar_html = build_sidebar(headings)
-    page = build_page(content_html, sidebar_html)
+    page = build_page(content_html, sidebar_html, version_info)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     print(f"Built: {OUT} ({len(page)} bytes)")
+    print(f"Version: {version_info['version']}")
+    print(f"Source modified: {version_info['src_modified']}")
+    print(f"Git commit: {version_info['git_hash']}")
+    print(f"Build time: {version_info['build_time']}")
 
 
 if __name__ == "__main__":
