@@ -582,23 +582,60 @@ def build_page(content_html, sidebar_html, version_info=None):
       <div class="subtitle">—— 全剧情小说体纪事 ——</div>
       <div class="meta">新长安2077 · 零号计划 · 意识觉醒</div>
       <div class="version-info">
-        <span class="version-tag" title="源文件更新时间">📅 {version_info['src_modified']}</span>
+        <span class="version-tag" title="源文件更新时间">📅 <span class="utc-time" data-utc="{version_info['src_modified']}">{version_info['src_modified']}</span></span>
         <span class="version-separator">·</span>
         <span class="version-tag" title="Git提交哈希">🔗 {version_info['git_hash']}</span>
         <span class="version-separator">·</span>
-        <span class="version-tag" title="构建时间">🔨 {version_info['build_time']}</span>
+        <span class="version-tag" title="构建时间">🔨 <span class="utc-time" data-utc="{version_info['build_time']}">{version_info['build_time']}</span></span>
       </div>
     </header>
     <div class="content">
       {content_html}
     </div>
     <footer>
-      <p>版本：{version_info['version']} · 构建于 {version_info['build_time']} · 3分钟神探</p>
-      <p class="footer-detail">源文件更新：{version_info['src_modified']} · Git: {version_info['git_hash']}</p>
+      <p>版本：{version_info['version']} · 构建于 <span class="utc-time" data-utc="{version_info['build_time']}">{version_info['build_time']}</span> · 3分钟神探</p>
+      <p class="footer-detail">源文件更新：<span class="utc-time" data-utc="{version_info['src_modified']}">{version_info['src_modified']}</span> · Git: {version_info['git_hash']}</p>
     </footer>
   </div>
 </div>
 <script>
+  // 将UTC时间转换为本地时间显示
+  function convertUTCToLocal() {{
+    document.querySelectorAll('.utc-time').forEach(el => {{
+      const utcStr = el.getAttribute('data-utc');
+      if (!utcStr) return;
+      
+      // 解析时间字符串 (格式: YYYY-MM-DD HH:MM)
+      const parts = utcStr.match(/(\\d{{4}})-(\\d{{2}})-(\\d{{2}})\\s+(\\d{{2}}):(\\d{{2}})/);
+      if (!parts) return;
+      
+      // 创建UTC日期对象
+      const utcDate = new Date(Date.UTC(
+        parseInt(parts[1]),
+        parseInt(parts[2]) - 1,
+        parseInt(parts[3]),
+        parseInt(parts[4]),
+        parseInt(parts[5])
+      ));
+      
+      // 转换为本地时间字符串
+      const localTime = utcDate.toLocaleString('zh-CN', {{
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }});
+      
+      el.textContent = localTime;
+      el.title = 'UTC: ' + utcStr;  // 鼠标悬停显示UTC时间
+    }});
+  }}
+  
+  // 页面加载时转换时间
+  convertUTCToLocal();
+
   // Theme
   function setTheme(t) {{
     document.documentElement.setAttribute('data-theme', t);
